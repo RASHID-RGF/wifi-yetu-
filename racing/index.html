@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>APEX RACER — Neon Coast GP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<main id="stage" class="stage">
+  <canvas id="game" aria-label="racing game view"></canvas>
+
+  <!-- ============================== HUD ============================== -->
+  <section id="hud" class="hud" hidden aria-label="heads-up display">
+    <div class="hud-tl glass">
+      <div class="pill"><span class="pill-label">LAP</span><span class="pill-value" id="lapVal">1/3</span></div>
+      <div class="pill"><span class="pill-label">POS</span><span class="pill-value" id="posVal">6/6</span></div>
+    </div>
+
+    <div class="hud-tc glass">
+      <div class="time" id="timeVal">00:00.000</div>
+      <div class="time-sub">BEST <span id="bestVal">--:--.---</span></div>
+      <div class="progress"><i id="progressFill"></i></div>
+    </div>
+
+    <div class="hud-tr">
+      <button class="icon-btn" id="muteBtn" title="Mute (M)" aria-label="toggle sound">♪</button>
+      <button class="icon-btn" id="pauseBtn" title="Pause (Esc)" aria-label="pause">❚❚</button>
+    </div>
+
+    <div class="hud-bl glass">
+      <div class="odo">DIST <span id="distVal">0.00</span> km</div>
+      <div class="odo">TOP <span id="topVal">0</span> km/h</div>
+    </div>
+
+    <div class="hud-br">
+      <div class="speedo">
+        <svg viewBox="0 0 160 160" class="gauge" aria-hidden="true">
+          <circle cx="80" cy="80" r="73" class="g-ring" />
+          <path class="g-track" d="M37.57 122.43 A60 60 0 1 1 122.43 122.43" pathLength="100" />
+          <path class="g-fill" id="gFill" d="M37.57 122.43 A60 60 0 1 1 122.43 122.43"
+                pathLength="100" stroke-dasharray="0 100" />
+          <g id="ticks"></g>
+          <g id="needle" class="needle">
+            <line x1="80" y1="80" x2="80" y2="34" />
+            <circle cx="80" cy="80" r="7" class="hub" />
+          </g>
+          <text id="speedVal" x="80" y="108" class="g-num">0</text>
+          <text x="80" y="128" class="g-unit">KM/H</text>
+        </svg>
+      </div>
+      <div class="nitro">
+        <div class="nitro-label">NITRO <span id="nitroPct">100%</span></div>
+        <div class="nitro-bar"><i id="nitroFill"></i></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ overlays =========================== -->
+  <div id="countdown" class="countdown" hidden></div>
+  <div id="toast" class="toast" hidden></div>
+
+  <section id="menu" class="screen">
+    <div class="panel">
+      <p class="eyebrow">NEON COAST GRAND PRIX</p>
+      <h1 class="title"><span>APEX</span><em>RACER</em></h1>
+      <p class="sub">3 laps &middot; 6 cars &middot; sunset circuit</p>
+
+      <div class="swatches" id="swatches" role="group" aria-label="choose car colour"></div>
+
+      <button class="btn primary" id="startBtn">START RACE</button>
+
+      <div class="keys">
+        <div><kbd>W</kbd><kbd>↑</kbd> accelerate</div>
+        <div><kbd>S</kbd><kbd>↓</kbd> brake</div>
+        <div><kbd>A</kbd><kbd>D</kbd><kbd>←</kbd><kbd>→</kbd> steer</div>
+        <div><kbd>SPACE</kbd> nitro</div>
+        <div><kbd>ESC</kbd> pause</div>
+        <div><kbd>M</kbd> mute</div>
+      </div>
+
+      <p class="best-line">BEST LAP <span id="menuBest">--:--.---</span></p>
+    </div>
+  </section>
+
+  <section id="pause" class="screen" hidden>
+    <div class="panel">
+      <p class="eyebrow">RACE SUSPENDED</p>
+      <h2 class="title small">PAUSED</h2>
+      <button class="btn primary" id="resumeBtn">RESUME</button>
+      <button class="btn ghost" id="restartBtn">RESTART</button>
+      <button class="btn ghost" id="quitBtn">MAIN MENU</button>
+    </div>
+  </section>
+
+  <section id="results" class="screen" hidden>
+    <div class="panel">
+      <p class="eyebrow" id="resEyebrow">RACE COMPLETE</p>
+      <h2 class="title small" id="resTitle">1ST PLACE</h2>
+      <div class="stats">
+        <div><span>TOTAL</span><b id="resTotal">--:--.---</b></div>
+        <div><span>BEST LAP</span><b id="resBest">--:--.---</b></div>
+        <div><span>TOP SPEED</span><b id="resTop">0 km/h</b></div>
+      </div>
+      <button class="btn primary" id="againBtn">RACE AGAIN</button>
+      <button class="btn ghost" id="menuBtn">MAIN MENU</button>
+    </div>
+  </section>
+
+  <!-- ========================= touch controls ======================== -->
+  <div id="touch" class="touch" hidden>
+    <div class="touch-side">
+      <button class="tbtn" data-key="left" aria-label="steer left">◀</button>
+      <button class="tbtn" data-key="right" aria-label="steer right">▶</button>
+    </div>
+    <div class="touch-side right">
+      <button class="tbtn boost" data-key="boost">N2O</button>
+      <button class="tbtn brake" data-key="brake">BRK</button>
+      <button class="tbtn gas" data-key="gas">GAS</button>
+    </div>
+  </div>
+
+  <div class="vignette" aria-hidden="true"></div>
+</main>
+
+<script src="game.js"></script>
+</body>
+</html>
